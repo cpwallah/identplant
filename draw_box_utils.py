@@ -58,31 +58,32 @@ def draw_text(draw,
     # {category_index[str(cls)]}
     # display_str = f"{category_index[str(cls)]}: {int(100 * score)}%"
     display_str = f"{category_index[str(cls)]}"
-    display_str_heights = [font.getsize(ds)[1] for ds in display_str]
+    # display_str_heights = [font.getsize(ds)[1] for ds in display_str]
     # Each display_str has a top and bottom margin of 0.05x.
-    display_str_height = (1 + 2 * 0.05) * max(display_str_heights)
+    # display_str_height = (1 + 2 * 0.05) * max(display_str_heights)
 
-    if top > display_str_height:
-        text_top = top - display_str_height
-        text_bottom = top
-    else:
-        text_top = bottom
-        text_bottom = bottom + display_str_height
+    # if top > display_str_height:
+    #     text_top = top - display_str_height
+    #     text_bottom = top
+    # else:
+    #     text_top = bottom
+    #     text_bottom = bottom + display_str_height
 
     # font_path = os.path.join("assets", "Hiragino Sans GB.ttc")
 
-    local_font = ImageFont.truetype("simsun", size=font_size, encoding="gbk")
-    for ds in display_str:
-        text_width, text_height = font.getsize(ds)
-        text_width = text_width * 1.5
-        margin = np.ceil(0.05 * text_width)
-        draw.rectangle([(left, text_top),
-                        (left + text_width + 2 * margin, text_bottom)], fill=color)
-        draw.text((left + margin, text_top),
-                  ds,
-                  fill='black',
-                  font=local_font)
-        left += text_width
+    # local_font = ImageFont.truetype("simsun", size=font_size, encoding="gbk")
+    # for ds in display_str:
+    #     # text_width, text_height = font.getsize(ds)
+    #     # text_width = text_width * 1.5
+    #     # margin = np.ceil(0.05 * text_width)
+    #     # draw.rectangle([(left, text_top),
+    #     #                 (left + text_width + 2 * margin, text_bottom)], fill=color)
+    #     # draw.text((left + margin, text_top),
+    #     #           ds,
+    #     #           fill='black',
+    #     #           font=local_font)
+    #     left += text_width
+    return display_str
 
 
 def draw_masks(image, masks, colors, thresh: float = 0.7, alpha: float = 0.5):
@@ -97,6 +98,19 @@ def draw_masks(image, masks, colors, thresh: float = 0.7, alpha: float = 0.5):
 
     out = np_image * (1 - alpha) + img_to_draw * alpha
     return fromarray(out.astype(np.uint8))
+
+
+
+# RGB格式颜色转换为16进制颜色格式
+def RGB_to_Hex(rgb):
+    RGB = [rgb[0],rgb[1],rgb[2]]           # 将RGB格式划分开来
+    color = '#'
+    for i in RGB:
+        num = int(i)
+        # 将R、G、B分别转化为16进制拼接转换并大写  hex() 函数用于将10进制整数转换成16进制，以字符串形式表示
+        color += str(hex(num))[-2:].replace('x', '0').upper()
+    print(color)
+    return color
 
 
 def draw_objs(image: Image,
@@ -172,6 +186,8 @@ def draw_objs(image: Image,
     # draw_text(draw, box.tolist(), int(cls), float(score), category_index, color, font, font_size)
     # image = draw_masks(image, masks, colors, mask_thresh)
     tempIndex = 0
+    result_str = ''
+    result_color = None
     if draw_boxes_on_image:
         # Draw all boxes onto image.
         draw = ImageDraw.Draw(image)
@@ -191,11 +207,12 @@ def draw_objs(image: Image,
             # 绘制类别和概率信息
 
             # draw_text(draw, box.tolist(), int(cls), float(score), category_index, color, font, font_size)
-            draw_text(draw, boxList, int(cls), float(score), category_index, color, font, font_size)
+            result_str = draw_text(draw, boxList, int(cls), float(score), category_index, color, font, font_size)
+            result_color = color
             break
         # tempIndex = tempIndex + 1
     if draw_masks_on_image and (masks is not None):
         # Draw all mask onto image.
         image = draw_masks(image, masks, colors, mask_thresh)
 
-    return image
+    return [result_str, RGB_to_Hex(result_color)]

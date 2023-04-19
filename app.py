@@ -8,6 +8,9 @@ import torch
 from PIL import Image
 # from gevent import pywsgi
 from flask import Flask, request, send_file, send_from_directory
+from werkzeug.middleware.dispatcher import DispatcherMiddleware
+from werkzeug.serving import run_simple
+
 from torchvision import transforms
 
 from backbone import resnet50_fpn_backbone
@@ -18,6 +21,10 @@ from network_files import FasterRCNN
 # from torchvision import transforms
 
 app = Flask(__name__)
+application = DispatcherMiddleware(
+    app, {"/api": app}
+)
+
 basedir = os.path.abspath(os.path.dirname(__file__))
 
 
@@ -200,6 +207,11 @@ def classify():
 
 
 if __name__ == '__main__':
-    app.run(host='0.0.0.0', port=5000)
-    # server = pywsgi.WSGIServer(('127.0.0.1', 5000), app)
-    # server.serve_forever()
+    # app.run(host='0.0.0.0', port=5000, threaded=True, use_reloader=True)
+    run_simple(
+        "0.0.0.0",
+        int("5000"),
+        application,
+        use_debugger=False,
+        threaded=True,
+    )

@@ -5,6 +5,7 @@ import PIL.ImageDraw as ImageDraw
 import PIL.ImageFont as ImageFont
 from PIL import ImageColor
 import numpy as np
+import random
 from torch._appdirs import unicode
 
 STANDARD_COLORS = [
@@ -93,12 +94,13 @@ def draw_objs(image: Image,
         # print("低目标")
         return image
 
-    colors = [ImageColor.getrgb(STANDARD_COLORS[cls % len(STANDARD_COLORS)]) for cls in classes]
+    co = random.randint(0, len(STANDARD_COLORS)-1)
+    color = ImageColor.getrgb(STANDARD_COLORS[co])
 
     result_str = ''
     result_color = None
     if draw_boxes_on_image:
-        for box, cls, score, color in zip(boxes, classes, scores, colors):
+        for box, cls, score in zip(boxes, classes, scores):
             # draw_text(draw, box.tolist(), int(cls), float(score), category_index, color, font, font_size)
             result_str = f"{category_index[str(cls)]}"
             result_color = color
